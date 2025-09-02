@@ -338,7 +338,8 @@
                     }
                 }
 
-                const shortUrl = `${this.baseUrl}/${shortCode}`;
+                // For GitHub Pages, use query parameter format
+                const shortUrl = `${this.baseUrl}?r=${shortCode}`;
                 
                 this.urls[shortCode] = {
                     original: originalUrl,
@@ -420,32 +421,22 @@
             }
         });
 
-        // Handle redirect
+        // Handle redirect with URL parameters for GitHub Pages
         function handleRedirect() {
-            const path = window.location.pathname;
-            const isLocal = window.location.protocol === 'file:';
+            const urlParams = new URLSearchParams(window.location.search);
+            const shortCode = urlParams.get('r');
             
-            // Skip redirect logic for local files
-            if (isLocal) {
-                return;
-            }
-            
-            // For GitHub Pages, handle subfolder structure
-            const basePath = '/biv-links/';
-            if (path.startsWith(basePath) && path.length > basePath.length) {
-                const shortCode = path.substring(basePath.length);
+            if (shortCode) {
                 const originalUrl = urlShortener.getOriginalUrl(shortCode);
                 
                 if (originalUrl) {
                     urlShortener.incrementClick(shortCode);
                     window.location.href = originalUrl;
-                    return;
+                } else {
+                    alert('Link tidak ditemukan!');
+                    // Clean URL by removing parameters
+                    window.history.replaceState({}, document.title, window.location.pathname);
                 }
-            }
-            
-            // If no valid short code found and not on main page, go to main page
-            if (path !== basePath && path !== '/') {
-                window.location.href = basePath;
             }
         }
 
