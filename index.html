@@ -282,7 +282,7 @@
         class URLShortener {
             constructor() {
                 this.urls = this.loadUrls();
-                this.baseUrl = window.location.origin;
+                this.baseUrl = window.location.origin + window.location.pathname.replace('/index.html', '').replace(/\/$/, '');
                 this.renderUrlList();
             }
 
@@ -430,17 +430,22 @@
                 return;
             }
             
-            if (path !== '/' && path.length > 1) {
-                const shortCode = path.substring(1);
+            // For GitHub Pages, handle subfolder structure
+            const basePath = '/biv-links/';
+            if (path.startsWith(basePath) && path.length > basePath.length) {
+                const shortCode = path.substring(basePath.length);
                 const originalUrl = urlShortener.getOriginalUrl(shortCode);
                 
                 if (originalUrl) {
                     urlShortener.incrementClick(shortCode);
                     window.location.href = originalUrl;
-                } else {
-                    alert('Link tidak ditemukan!');
-                    window.location.href = '/';
+                    return;
                 }
+            }
+            
+            // If no valid short code found and not on main page, go to main page
+            if (path !== basePath && path !== '/') {
+                window.location.href = basePath;
             }
         }
 
